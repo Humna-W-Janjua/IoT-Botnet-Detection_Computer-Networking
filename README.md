@@ -1,7 +1,5 @@
 # IoT-Botnet-Detection_Computer-Networking
 Semester project
-# IoT Botnet Detection: Feature Ablation & Neural Network Optimization
-
 ## Overview
 This repository contains a complete Intrusion Detection System (IDS) pipeline built to identify malicious botnet traffic (e.g., Mirai, Okiru, DDoS) in IoT networks. The project leverages the **IoT-23 dataset** and implements a custom methodology comparing tree-based baseline models against a proposed PyTorch Multi-Layer Perceptron (MLP).
 
