@@ -1,0 +1,18 @@
+% ===== s00_front =====
+\title{Lightweight and Explainable IoT Botnet Detection on IoT-23: An Empirical Comparison of Tree Ensembles and a Compact MLP with SHAP-Guided Feature Reduction}
+
+\author{Aima Naveed  \qquad Humna Wasim Janjua \\
+\normalsize BS Artificial Intelligence, FAST-NUCES Islamabad, Pakistan\\
+\normalsize \texttt{i242550@isb.nu.edu.pk}, \texttt{i240048@isb.nu.edu.pk}}
+
+\markboth{}{Naveed \MakeLowercase{\textit{et al.}}: Lightweight and Explainable IoT Botnet Detection on IoT-23}
+
+\maketitle
+
+\begin{abstract}
+IoT botnets exploit weakly protected, resource-constrained devices, yet accurate detectors are often heavy or opaque, and many published results rest on balanced benchmarks and single splits. This paper benchmarks four standard classifiers (logistic regression, random forest, XGBoost, LightGBM) and a 4,865-parameter compact multilayer perceptron (MLP) for binary botnet detection on IoT-23, using a 50,000-flow stratified sample of its 6,046,623 Zeek connection records, SMOTE applied to training data only, and SHAP-based feature analysis with a three-feature ablation. LightGBM obtained the highest macro-F1 (0.9106) and, together with XGBoost, the highest ROC-AUC (0.9467), but its false-positive rate remained 0.2526. The compact MLP reached only 0.6904 macro-F1 and 0.7135 ROC-AUC, indistinguishable from logistic regression (0.6905 and 0.6937), although its measured inference time was roughly 24 to 28 times lower than that of random forest and LightGBM. SHAP ranked \texttt{orig\_ip\_bytes}, \texttt{duration}, and \texttt{orig\_pkts} as the most influential traffic features; restricting the MLP to these three features halved its parameters but lowered ROC-AUC to 0.6401. The lightweight model therefore did not match tree ensembles. The study documents several threats to validity, including a residual row-index column, single-run evaluation, and flow-level random splitting, and offers a transparent baseline and a negative finding for lightweight IoT botnet detection.
+\end{abstract}
+
+\begin{IEEEkeywords}
+IoT botnet detection, IoT-23, explainable AI, SHAP, feature selection, lightweight models
+\end{IEEEkeywords}

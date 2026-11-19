@@ -1,0 +1,77 @@
+% ===== s03_methodology =====
+\section{Proposed Methodology}
+\subsection{Problem Formulation}
+Let $\mathcal{D}=\{(\mathbf{x}_i,y_i)\}_{i=1}^{n}$ be labelled connection records, where $\mathbf{x}_i\in\mathbb{R}^{d}$ is a numeric feature vector and $y_i\in\{0,1\}$ is the label ($1$ for any botnet-related activity, $0$ for benign). The goal is a classifier $f_{\theta}:\mathbb{R}^{d}\rightarrow[0,1]$ that maximises macro-F1 and ROC-AUC while keeping the false-positive rate and the per-sample cost low. A flow is flagged as an attack when $f_{\theta}(\mathbf{x})\ge 0.5$.
+
+\subsection{Overall Pipeline}
+Fig.~\ref{fig:arch} shows the implemented pipeline. Raw connection records are sampled, cleaned, encoded, split, balanced (training data only), and standardised before training. Four baselines and the compact MLP are evaluated on the same held-out test set, a SHAP analysis ranks features, and the highest-ranked traffic features define an ablation of the MLP.
+
+\begin{figure*}[!t]
+\centering
+\resizebox{0.95\textwidth}{!}{%
+\begin{tikzpicture}[box/.style={draw, rounded corners, align=center, text width=2.6cm, minimum height=1.0cm, font=\scriptsize},
+  arr/.style={-{Latex}, thick}]
+\node[box] (n1) {IoT-23 combined file\\6,046,623 Zeek flows};
+\node[box, right=0.45cm of n1] (n2) {Random sample\\50,000 flows (seed 42)};
+\node[box, right=0.45cm of n2] (n3) {Drop identifiers; encode\\one-hot, binary label};
+\node[box, right=0.45cm of n3] (n4) {Stratified split\\27,510 / 7,490 / 15,000};
+\node[box, right=0.45cm of n4] (n5) {SMOTE (train only)\\StandardScaler (fit on train)};
+\node[box, below=0.7cm of n5] (n6) {Models: LR, RF, XGBoost,\\LightGBM, compact MLP};
+\node[box, left=0.45cm of n6] (n7) {Evaluation on test set\\macro-F1, ROC-AUC, FPR, latency};
+\node[box, left=0.45cm of n7] (n8) {SHAP (TreeExplainer on RF)\\top-10 feature ranking};
+\node[box, left=0.45cm of n8] (n9) {Ablation: MLP on\\top-3 SHAP traffic features};
+\draw[arr] (n1)--(n2); \draw[arr] (n2)--(n3); \draw[arr] (n3)--(n4); \draw[arr] (n4)--(n5);
+\draw[arr] (n5)--(n6); \draw[arr] (n6)--(n7); \draw[arr] (n7)--(n8); \draw[arr] (n8)--(n9);
+\end{tikzpicture}}
+\caption{Implemented experimental pipeline. Scaling and SMOTE use training data only.}
+\label{fig:arch}
+\end{figure*}
+
+\subsection{Preprocessing and Class Balancing}
+Spoofable identifiers (timestamp, connection identifier, source and destination address and port) are dropped so that a detector cannot rely on them. The Zeek placeholder \texttt{-} is converted to a missing value and then to zero. The categorical fields \texttt{proto}, \texttt{service}, \texttt{conn\_state}, and \texttt{history} are one-hot encoded, giving $d=42$ columns. SMOTE \cite{chawla2002} generates minority-class samples by interpolation,
+\begin{equation}
+\mathbf{x}_{\text{new}}=\mathbf{x}_i+\lambda(\mathbf{x}_{nn}-\mathbf{x}_i),\quad \lambda\sim\mathcal{U}(0,1),
+\end{equation}
+where $\mathbf{x}_{nn}$ is a nearest neighbour of $\mathbf{x}_i$ within the minority class. SMOTE is applied to the training partition only, and a \texttt{StandardScaler} fitted on the resulting training data standardises all partitions.
+
+\subsection{Models}
+\textbf{Baselines.} Logistic regression, random forest \cite{breiman2001}, XGBoost \cite{chen2016}, and LightGBM \cite{ke2017} are trained with the settings in Table~\ref{tab:hyper}.
+
+\textbf{Compact MLP.} The compact detector has two hidden layers,
+\begin{align}
+\mathbf{h}_1&=\mathrm{ReLU}(\mathbf{W}_1\mathbf{x}+\mathbf{b}_1),\ \mathbf{W}_1\in\mathbb{R}^{64\times d},\\
+\mathbf{h}_2&=\mathrm{ReLU}(\mathbf{W}_2\mathbf{h}_1+\mathbf{b}_2),\ \mathbf{W}_2\in\mathbb{R}^{32\times 64},\\
+\hat{y}&=\sigma(\mathbf{w}_3^{\top}\mathbf{h}_2+b_3),
+\end{align}
+with dropout ($p=0.2$) after the first hidden layer during training. With $d=42$ it has 4,865 parameters, and with $d=3$ it has 2,369. It is trained by minimising the binary cross-entropy over a mini-batch of size $B$,
+\begin{equation}
+\mathcal{L}=-\frac{1}{B}\sum_{i=1}^{B}\big[y_i\log\hat{y}_i+(1-y_i)\log(1-\hat{y}_i)\big],
+\end{equation}
+using Adam \cite{kingma2015}.
+
+\subsection{SHAP-Based Feature Ranking}
+SHAP \cite{lundberg2017} assigns each feature $j$ a contribution $\phi_j(\mathbf{x})$ to a prediction. For tree models, TreeExplainer computes these values efficiently \cite{lundberg2020}. The global importance of feature $j$ over $n_s$ explained samples is
+\begin{equation}
+I_j=\frac{1}{n_s}\sum_{i=1}^{n_s}\left|\phi_j(\mathbf{x}_i)\right|,
+\end{equation}
+computed for the attack class of the random forest on $n_s=1{,}000$ flows. The three highest-ranked traffic features define the ablation in Section~VII.
+
+\begin{algorithm}[!t]
+\caption{Experimental procedure}
+\label{alg:proc}
+\begin{algorithmic}[1]
+\Require Combined IoT-23 file, sample size $N=50{,}000$, seed $s=42$
+\State Sample $N$ flows; drop identifiers; encode categoricals; set $y\leftarrow\mathbb{1}[\text{label}\neq\text{Benign}]$
+\State Split stratified into $\mathcal{D}_{\text{train}},\mathcal{D}_{\text{val}},\mathcal{D}_{\text{test}}$
+\State $\mathcal{D}_{\text{train}}\leftarrow\textsc{SMOTE}(\mathcal{D}_{\text{train}})$; fit scaler on $\mathcal{D}_{\text{train}}$; transform all partitions
+\For{each baseline $m\in\{\text{LR},\text{RF},\text{XGB},\text{LGBM}\}$}
+  \State Fit $m$ on $\mathcal{D}_{\text{train}}$; record metrics and inference time on $\mathcal{D}_{\text{test}}$
+\EndFor
+\State Train compact MLP for 20 epochs (Adam, BCE); record metrics
+\State Compute $I_j$ with TreeExplainer on RF; select top-3 traffic features
+\State Retrain the MLP on the top-3 features; record metrics
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Changes Relative to the Phase 2 Plan}
+The Phase 2 methodology proposed split or federated training, probability calibration, cross-dataset and device-disjoint evaluation, adversarial tests, and multi-seed statistical testing. The implemented work covers centralised training, SHAP feature ranking, and the ablation only. The remaining components were not implemented and are treated as future work (Section~IX).

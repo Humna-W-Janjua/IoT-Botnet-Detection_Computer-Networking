@@ -1,0 +1,20 @@
+% ===== s08_discussion =====
+\section{Discussion}
+\textbf{Why the results look as they do.} Tree ensembles handle heavy-tailed byte, packet, and duration counts and one-hot indicators without scaling, whereas the MLP was trained for only 20 epochs on standardised, SMOTE-balanced data and ended near the performance of logistic regression. These are hypotheses; the study did not test input transforms, longer training, or tuning.
+
+\textbf{Practical implications.} For a skewed, heterogeneous corpus such as IoT-23, a gradient-boosted model offers the best accuracy among the tested options, while the compact MLP offers the lowest cost but not usable accuracy. Feature reduction guided by a random forest transferred poorly to the MLP.
+
+\textbf{Strengths.} The pipeline keeps SMOTE and scaling inside the training partition, uses a test set with natural prevalence, reports macro-F1 and FPR rather than accuracy alone, and discloses its weaknesses.
+
+\textbf{Limitations and failure cases.} The MLP and logistic regression flag about 61\% of benign flows, and every model has an FPR above 0.20. Failures by attack family were not analysed.
+
+\textbf{Threats to validity.}
+\begin{itemize}
+\item \textit{Residual row index.} The unnamed leading column, apparently a saved row index, was kept as a feature and ranked fourth in SHAP importance. If rows in the source file are ordered by scenario or label, this column leaks label information to tree models and inflates their results relative to the MLP. The magnitude was not measured; the experiments should be repeated with this column removed.
+\item \textit{Split design.} The split is random at flow level, so flows from the same capture or device can appear in training and test sets, and the proportions are 55/15/30 rather than 70/15/15.
+\item \textit{Feature selection on test data.} SHAP importance was computed on a sample of the test set, so the ablation's feature choice is not independent of the test data.
+\item \textit{Single run and sample.} One seed and a 50,000-flow sample were used, with no confidence intervals, tuning, or cross-validation.
+\item \textit{Timing.} Inference times are single, coarse wall-clock measurements.
+\end{itemize}
+
+\textbf{Were the objectives met?} Partly. The study produced a lightweight and SHAP-explainable baseline and measured the cost of feature reduction. The Phase 2 objectives of privacy-aware training, calibrated probabilities, cross-dataset and device-disjoint generalisation, evasion testing, and statistical comparison were not achieved. The proposed compact MLP did not reach the accuracy of the tree baselines.

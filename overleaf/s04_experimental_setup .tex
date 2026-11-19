@@ -1,0 +1,54 @@
+% ===== s04_experimental_setup =====
+\section{Experimental Setup}
+\subsection{Dataset}
+IoT-23 \cite{iot23} contains labelled Zeek connection logs from malicious and benign IoT captures. The combined file used here has 6,046,623 rows and 13 labels (Table~\ref{tab:labels}); 88.6\% of rows are non-benign.
+
+\begin{table}[!t]
+\centering
+\caption{Label distribution of the combined IoT-23 file.}
+\label{tab:labels}
+\footnotesize
+\begin{tabular}{@{}lr@{}}
+\toprule
+\textbf{Label} & \textbf{Rows} \\
+\midrule
+PartOfAHorizontalPortScan & 3,389,036 \\
+Okiru & 1,313,012 \\
+Benign & 688,812 \\
+DDoS & 638,506 \\
+C\&C & 15,286 \\
+C\&C-HeartBeat & 1,332 \\
+Attack & 538 \\
+Six other labels (combined) & 101 \\
+\midrule
+Total & 6,046,623 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Sampling, Splits, and Features}
+A random sample of 50,000 flows (seed 42, 0.83\% of the file) was drawn, and all non-benign labels were merged into one positive class. The sample was split by stratification into 27,510 training, 7,490 validation, and 15,000 test flows (55.0\%, 15.0\%, 30.0\%). The training partition contained 24,351 attack and 3,159 benign flows before SMOTE and 24,351 of each after it (48,702 total); the validation and test partitions keep the natural skew of about 11.5\% benign flows, so the test set holds roughly 1,720 benign flows. The validation partition was created but not used for tuning or early stopping. A leading unnamed column of the source CSV (apparently a saved row index) was not removed and is among the 42 input columns; its implications are discussed in Section~VIII.
+
+\subsection{Baselines, Metrics, and Implementation}
+Table~\ref{tab:hyper} lists the settings; unspecified parameters are library defaults. Metrics are macro-F1 (mean of the F1-scores of the benign and attack classes), ROC-AUC, the false-positive rate $\mathrm{FPR}=\mathrm{FP}/(\mathrm{FP}+\mathrm{TN})$, and inference time per sample, measured as wall-clock time of one batch prediction on the test set divided by 15,000.
+
+\begin{table}[!t]
+\centering
+\caption{Model settings. Seed 42 wherever a seed applies.}
+\label{tab:hyper}
+\footnotesize
+\begin{tabularx}{\columnwidth}{@{}l Y@{}}
+\toprule
+\textbf{Model} & \textbf{Settings} \\
+\midrule
+Logistic regression & \texttt{max\_iter}=1000 \\
+Random forest & 100 trees \\
+XGBoost & Defaults, log-loss evaluation metric \\
+LightGBM & Defaults (26 of 42 columns used) \\
+Compact MLP & 42-64-32-1; ReLU; dropout 0.2; Adam, learning rate $10^{-3}$; batch 128; 20 epochs; threshold 0.5 \\
+SHAP & TreeExplainer on RF; 1,000 test flows \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{Environment }Experiments ran in a Jupyter notebook (Python 3.10) using scikit-learn [21], imbalanced-learn [22], XGBoost [16], LightGBM [17], PyTorch [23], and SHAP [19] on a local Windows machine (16\,GB RAM, CPU-only inference). Times below the wall-clock timer resolution ($<0.0001$\,ms/sample) are denoted as \texttt{<res.} in Table~IV. The combined CSV was obtained from the preprocessed Kaggle IoT-23 compilation derived from the Stratosphere Lab release [13].

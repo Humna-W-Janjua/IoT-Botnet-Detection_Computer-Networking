@@ -1,0 +1,39 @@
+% ===== s02_related_work =====
+\section{Related Work}
+Table~\ref{tab:related} summarises the studies reviewed; they are discussed below by theme.
+
+\textbf{Threat landscape.} Antonakakis et al.\ reconstructed Mirai's infection cycle and its reliance on default credentials \cite{antonakakis2017}. A two-week Cowrie and IoTPOT honeypot study found that \texttt{root} and \texttt{admin} dominate credential guesses, with Telnet receiving roughly fifteen times the top-source volume of SSH \cite{banoth2026}, but it proposes no detector and uses a single IP address. DCmal-2025 showed that routing commands can disconnect hosts while only 1.39\% to 9.72\% of about 72 antivirus engines flagged the executables \cite{abujazoh2025}, which motivates behaviour-based detection.
+
+\textbf{Learning-based detection.} Power-consumption signatures have been classified with CNN, Transformer, and random forest models \cite{wakili2025}. A heterogeneous radial basis function network on 88 packet-length features of CTU-13 reported 97.86\% accuracy and a smooth degradation under Gaussian noise \cite{awad2026}. An AIoT architecture combining detection, honeypots, and sandboxing was validated in a virtual testbed \cite{memos2026}. These studies use one dataset or a controlled testbed.
+
+\textbf{Graph and temporal models.} RIGS combines Rank Degree and PageRank-guided forest-fire sampling to train a GCN on large communication graphs, reducing time and memory but with only one or two positive test nodes per scenario \cite{chai2026}. A GNN--LSTM with temperature and Platt calibration reached 99.88\% accuracy on N-BaIoT but used class-balanced samples and random splits \cite{babenko2026}.
+
+\textbf{Privacy-aware distributed learning.} Federated learning keeps raw traffic local for multi-stage botnet detection \cite{sudheera2026}. Traffic-constrained split learning with a six-block MLP achieved a mean macro-F1 of 98.27\% over three datasets at roughly one quarter of the federated communication cost \cite{aljaafreh2026}, but explanations and calibration were not studied.
+
+\textbf{Explainability and feature selection.} SHAP, PDP, and ALE were used on MQTT and TCP features of an emulated ICU network, where SHAP-selected features matched the full feature set \cite{georgiades2025}. A comparison of SHAP, mutual information, ANOVA, and PCA on N-BaIoT reached 0.9994 accuracy with ten SHAP features and used a leave-one-device-out check, but did not measure computational cost \cite{hua2026}.
+
+\textbf{Positioning.} The present work differs by evaluating a compact neural detector and tree baselines on IoT-23, whose natural class skew and multiple scenarios differ from the balanced benchmarks above, and by measuring what explanation-guided feature reduction costs.
+
+\begin{table*}[!t]
+\centering
+\caption{Summary of key studies reviewed (values as reported by the original authors).}
+\label{tab:related}
+\scriptsize
+\begin{tabularx}{\textwidth}{@{}l p{2.2cm} Y Y Y@{}}
+\toprule
+\textbf{Ref.} & \textbf{Theme} & \textbf{Data and method} & \textbf{Reported result} & \textbf{Key limitation} \\
+\midrule
+\cite{wakili2025} & Side-channel detection & IoT power traces; CNN, Transformer, RF & Power signatures separate botnet activity & Few device types; manipulated signatures untested \\
+\cite{sudheera2026} & Federated detection & Simulated multi-stage botnet traffic; FL with data mining & Raw traffic stays on clients & Limited environment; poisoning untested \\
+\cite{memos2026} & AIoT mitigation & Virtual AIoT testbed; ML, honeypots, sandbox & Feasible detection and response & Controlled testbed; overhead unknown \\
+\cite{chai2026} & Graph sampling & CTU-13, NCC-2; RIGS with GCN & 40.9\,s and 3.26\,GB on NCC-2; accuracy 0.93--0.96 & 1--2 positive test nodes; static graphs \\
+\cite{georgiades2025} & Explainable IDS & ICU-IoT; SHAP/PDP/ALE; six classifiers & Near-perfect KNN and RF with 13 features & One emulated dataset; explanations unmeasured \\
+\cite{abujazoh2025} & Evasive malware & Proof-of-concept malware; VirusTotal & 1.39\%--9.72\% of engines detect & No detector; static analysis only \\
+\cite{banoth2026} & Honeypot measurement & Cowrie and IoTPOT on one Azure VM, 2 weeks & \texttt{root} about 33\% (SSH), over 50\% (Telnet) & One IP address; no detection model \\
+\cite{babenko2026} & Graph--temporal model & N-BaIoT, CICIoT2023; GNN--LSTM with calibration & 99.88\% accuracy, Brier 0.0015 (N-BaIoT) & Balanced sampling; random splits \\
+\cite{aljaafreh2026} & Split learning & BoT-IoT, N-BaIoT, CIC-IDS2017; six-block MLP & Mean macro-F1 98.27\% & Archival data; no explanations \\
+\cite{awad2026} & Robust RBF network & CTU-13; heterogeneous RBFNN & 97.86\% accuracy, AUC 0.9968 & One dataset; TCP only; noise not adversarial \\
+\cite{hua2026} & SHAP feature selection & N-BaIoT; SHAP, MI, ANOVA, PCA; nine classifiers & LightGBM, top-10 SHAP: 0.9994 accuracy & Balanced classes; cost not measured \\
+\bottomrule
+\end{tabularx}
+\end{table*}

@@ -1,0 +1,17 @@
+% ===== s01_introduction =====
+\section{Introduction}
+\IEEEPARstart{T}{he} rapid growth of Internet of Things (IoT) deployments has enlarged the attack surface available to botnet operators. Default credentials, unpatched firmware, and exposed management services allowed Mirai to assemble large denial-of-service botnets \cite{antonakakis2017}, and recent honeypot measurements show that the same credential-guessing and command patterns persist a decade later \cite{banoth2026}. Evasion is also evolving: routing-level malware built from legitimate system commands escaped most antivirus engines in a recent proof of concept \cite{abujazoh2025}. Detection therefore has to rely on behaviour rather than signatures.
+
+Learning-based detectors have reported very high accuracy on benchmark data, using graph and temporal models \cite{babenko2026,chai2026}, radial basis function networks \cite{awad2026}, privacy-aware split learning \cite{aljaafreh2026}, and explainable feature selection \cite{georgiades2025,hua2026}. Three limitations recur. First, accurate models are frequently heavy, centralised, or opaque, which suits neither constrained IoT gateways nor analysts who must justify alerts. Second, evaluations often use class-balanced samples, random splits, or a single dataset, so results may not transfer to the heavily skewed traffic seen in practice. Third, lightweight models and feature reduction are rarely compared against strong tree ensembles under the same preprocessing, so the cost of simplification is not quantified.
+
+\textbf{Research gap.} The literature reviewed in Phase 2 of this project shows no controlled comparison, on a large and heterogeneous IoT botnet corpus with natural class skew, of tree ensembles against a compact neural detector together with an explanation-guided feature reduction whose accuracy cost is measured.
+
+\textbf{Contributions.} This work makes the following contributions.
+\begin{itemize}
+\item A reproducible benchmark on IoT-23 (binary botnet versus benign) of four standard classifiers and a 4,865-parameter compact MLP, with SMOTE and scaling confined to training data.
+\item A SHAP-based global feature analysis of a random forest, identifying the traffic features that drive detection.
+\item An ablation showing the effect of reducing the MLP to the three highest-ranked SHAP traffic features.
+\item An explicit negative result: the compact MLP did not approach tree-ensemble performance, with a documented list of threats to validity and a fair comparison against base papers.
+\end{itemize}
+
+\textbf{Outline.} Section~II reviews related work, Section~III describes the methodology, Section~IV the experimental setup, Section~V the results, Section~VI the comparison with base papers, Section~VII the ablation, Section~VIII the discussion, and Section~IX concludes.

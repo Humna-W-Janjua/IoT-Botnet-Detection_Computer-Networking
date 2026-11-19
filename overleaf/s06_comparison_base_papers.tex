@@ -1,0 +1,32 @@
+% ===== s06_comparison_base_papers =====
+\section{Comparison with Base Papers}
+The base papers are the studies whose methods this work builds on: SHAP-based feature selection \cite{georgiades2025,hua2026}, calibrated graph--temporal detection \cite{babenko2026}, and a compact MLP under split learning \cite{aljaafreh2026}.
+
+\textbf{Summary.} Table~\ref{tab:related} lists their problem, data, method, results, and limitations.
+
+\textbf{Quantitative comparison.} Table~\ref{tab:base} places our results next to the values reported by the base papers. Asterisks mark numbers copied from the original papers; none of their pipelines was re-implemented, and the datasets differ, so the table is not a like-for-like comparison.
+
+\begin{table}[!t]
+\centering
+\caption{Reported results of base papers (*, from original papers) and this work (re-run on IoT-23).}
+\label{tab:base}
+\scriptsize
+\begin{tabularx}{\columnwidth}{@{}l l Y@{}}
+\toprule
+\textbf{Study} & \textbf{Dataset} & \textbf{Best reported result} \\
+\midrule
+Georgiades \cite{georgiades2025}* & ICU-IoT (4 classes) & KNN, RF near-perfect precision, recall, accuracy \\
+Babenko \cite{babenko2026}* & N-BaIoT & Accuracy 99.88\%, F1 0.9988, AUROC 0.9995 \\
+Alja'afreh \cite{aljaafreh2026}* & BoT-IoT, N-BaIoT, CIC-IDS2017 & Mean macro-F1 98.27\% (split learning) \\
+Hua \cite{hua2026}* & N-BaIoT (11 classes) & LightGBM, top-10 SHAP: accuracy 0.9994 \\
+\textbf{This work, LightGBM} & IoT-23 (binary) & Macro-F1 0.9106, AUROC 0.9467, FPR 0.2526 \\
+\textbf{This work, compact MLP} & IoT-23 (binary) & Macro-F1 0.6904, AUROC 0.7135, FPR 0.6115 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{Methodological comparison.} Like Hua et al.\ we rank features with SHAP and train gradient-boosted trees, and like Alja'afreh et al.\ we use a small MLP, but we train centrally, use IoT-23 with its natural skew in the test set, and add an ablation that measures the accuracy cost of reduction. We do not implement their split learning, calibration, or leave-one-device-out evaluation.
+
+\textbf{Improvement analysis.} This work does not improve on the base papers. Our best macro-F1 (0.9106) is 0.0882 below the F1 of 0.9988* reported on N-BaIoT \cite{babenko2026} and 0.0721 below the 98.27\%* reported in \cite{aljaafreh2026}, and our compact MLP is far lower still. Because datasets, class balance, and splits differ, these gaps should not be read as a ranking of methods.
+
+\textbf{Fairness and limitations.} The base papers use balanced or subsampled classes on N-BaIoT, BoT-IoT, or emulated data, whereas our test set retains an 11.5\% benign share and IoT-23 includes scanning, DDoS, and command-and-control scenarios. Our models are untuned, trained on 0.83\% of the file, and evaluated once. Factors that may explain the lower figures include dataset difficulty, no tuning, and the preprocessing choices, but this study did not isolate them.
