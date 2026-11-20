@@ -1,6 +1,6 @@
 # IoT-Botnet-Detection_Computer-Networking
 Semester project
-#iot-shield-visualizer.vercel.app
+[![Live Interactive Dashboard](https://img.shields.io/badge/Live_Demo-IoT--Shield_XAI-00809D?style=for-the-badge&logo=vercel)](https://iot-shield-visualizer.vercel.app)
 ## Overview
 This repository contains a complete Intrusion Detection System (IDS) pipeline built to identify malicious botnet traffic (e.g., Mirai, Okiru, DDoS) in IoT networks. The project leverages the **IoT-23 dataset** and implements a custom methodology comparing tree-based baseline models against a proposed PyTorch Multi-Layer Perceptron (MLP).
 
