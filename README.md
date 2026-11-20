@@ -29,7 +29,7 @@ To optimize for the extreme hardware constraints of IoT devices, **SHAP (SHapley
 * **Interpretability:** SHAP
 * **Data & Visualization:** Pandas, NumPy, Matplotlib, Seaborn
 
-> **Interactive Phase 5 Visualization Dashboard:** **[iot-shield-visualizer.vercel.app](https://iot-shield-visualizer.vercel.app)**
+> **Dashboard:** **[iot-shield-visualizer.vercel.app](https://iot-shield-visualizer.vercel.app)**
 
 
 
